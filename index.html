@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRISHTI-V1 | Enterprise Edge AI</title>
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --panel-bg: #1e293b;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-cyan: #38bdf8;
+            --accent-emerald: #10b981;
+            --accent-red: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dashboard-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header Section */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+        .header-title h1 {
+            color: var(--accent-cyan);
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 2px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .header-title p {
+            color: var(--text-muted);
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-emerald);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* KPI Metrics Bar */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .kpi-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            border-left: 4px solid var(--accent-cyan);
+        }
+        .kpi-title {
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .kpi-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--accent-emerald);
+            margin-top: 5px;
+        }
+
+        /* Main Console */
+        .main-console {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        /* Controls Panel */
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+        }
+        .panel h3 {
+            color: var(--text-main);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+        select:focus {
+            border-color: var(--accent-cyan);
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            font-weight: 800;
+            font-size: 14px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background: #0ea5e9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+        }
+        button:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Visualizer & Output */
+        .feed-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .overlay-ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: var(--accent-cyan);
+            font-family: monospace;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .json-box {
+            background: #050505;
+            color: var(--accent-emerald);
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            border-radius: 6px;
+            height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-wrapper">
+        <div class="header">
+            <div class="header-title">
+                <h1>DRISHTI-V1</h1>
+                <p>Enterprise Edge AI Sensor Fusion Simulator</p>
+            </div>
+            <div class="status-badge">
+                <div style="width:8px; height:8px; background:var(--accent-emerald); border-radius:50%; box-shadow: 0 0 8px var(--accent-emerald);"></div>
+                SYSTEM ONLINE
+            </div>
+        </div>
+
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-title">Unit Cost CapEx Reduction</div>
+                <div class="kpi-value">99.01%</div>
+                <div class="kpi-sub">₹5,00,000 (Legacy) → ₹4,934 (V1)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Inspection Velocity</div>
+                <div class="kpi-value">80 km/h</div>
+                <div class="kpi-sub">Zero traffic closures required</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Civilian Data Transmitted</div>
+                <div class="kpi-value">0 Bytes</div>
+                <div class="kpi-sub">100% Privacy by Design (Edge inference)</div>
+            </div>
+        </div>
+
+        <div class="main-console">
+            <div class="panel">
+                <h3>Deployment Parameters</h3>
+                
+                <div class="control-group">
+                    <label>Kinematic Platform</label>
+                    <select id="vehicleType">
+                        <option value="car">NHAI Patrol Vehicle (Fixed Z-Axis)</option>
+                        <option value="drone">UAV Drone (LiDAR Z-Axis Correction)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Atmospheric Condition</label>
+                    <select id="weatherType">
+                        <option value="clear">Clear Night (6000K Strobes)</option>
+                        <option value="fog">Dense Fog (850nm IR Optics)</option>
+                        <option value="rain">Monsoon Rain (Wet Override)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Inspection Target</label>
+                    <select id="targetType">
+                        <option value="centre_line">Fresh Centre Line (IRC 35 Pass)</option>
+                        <option value="worn_line">Degraded Edge Line (IRC 35 Fail)</option>
+                        <option value="sign">Overhead Gantry Sign (IRC 67)</option>
+                    </select>
+                </div>
+
+                <button id="runBtn" onclick="runSimulation()">Initiate 80 km/h Scan</button>
+            </div>
+
+            <div class="feed-container">
+                <div class="canvas-wrapper">
+                    <div class="overlay-ui" id="overlayText">
+                        FPS: 15.0 | CAM: OV2640 | STATE: STANDBY<br>
+                        WAITING FOR TRIGGER...
+                    </div>
+                    <canvas id="simCanvas"></canvas>
+                </div>
+
+                <div class="panel" style="padding: 0; border: none; background: transparent;">
+                    <h3 style="margin-bottom: 10px; padding-left: 5px;">NHAI Data Lake Output (JSON)</h3>
+                    <div class="json-box" id="jsonOutput">// Asynchronous payload queue is empty.
+// Waiting for edge-node event trigger...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const jsonOut = document.getElementById('jsonOutput');
+        const overlayText = document.getElementById('overlayText');
+        const runBtn = document.getElementById('runBtn');
+        
+        // Hi-DPI Canvas setup
+        canvas.width = 860;
+        canvas.height = 320;
+
+        function drawNoise() {
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Simulate camera noise
+            for(let i=0; i<100; i++) {
+                ctx.fillStyle = Math.random() > 0.5 ? '#111' : '#222';
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+            }
+        }
+        drawNoise();
+
+        function runSimulation() {
+            const vehicle = document.getElementById('vehicleType').value;
+            const weather = document.getElementById('weatherType').value;
+            const target = document.getElementById('targetType').value;
+            
+            runBtn.disabled = true;
+            runBtn.innerText = "SCANNING...";
+            overlayText.innerHTML = "FPS: 15.0 | CAM: OV2640 | STATE: <span style='color:var(--accent-red)'>CAPTURING (500ms Diff)</span><br>RUNNING YOLOv8-NANO INFERENCE...";
+
+            let frame = 0;
+            const animate = setInterval(() => {
+                frame++;
+                
+                // Base background (darker for clear, lighter grey for fog)
+                ctx.fillStyle = (weather === 'fog') ? '#1e293b' : '#0a0a0a'; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw Highway Perspective
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(canvas.width/2, 100);
+                ctx.lineTo(0, canvas.height);
+                ctx.moveTo(canvas.width/2, 100);
+                ctx.lineTo(canvas.width, canvas.height);
+                ctx.stroke();
+
+                // Target Animation
+                if (target === 'centre_line' || target === 'worn_line') {
+                    let yOffset = (frame * 25) % canvas.height;
+                    let scale = (yOffset / canvas.height) * 2; // gets bigger as it comes closer
+                    let width = 20 * scale;
+                    let height = 100 * scale;
+                    
+                    ctx.fillStyle = (weather === 'rain') ? '#475569' : (target === 'centre_line' ? '#ffffff' : '#facc15');
+                    ctx.globalAlpha = (target === 'worn_line') ? 0.3 : 0.9;
+                    ctx.fillRect(canvas.width/2 - width/2, yOffset, width, height);
+                    ctx.globalAlpha = 1.0;
+                } else if (target === 'sign') {
+                    let yOffset = (frame * 10) % 200;
+                    ctx.fillStyle = '#1d4ed8'; // Highway blue
+                    ctx.fillRect(canvas.width/2 + 50, 50 - yOffset, 200, 80);
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.fillText('DELHI', canvas.width/2 + 120, 100 - yOffset);
+                }
+
+                // Strobe Flash Effect (Frames 5-8)
+                if (frame > 5 && frame < 9) {
+                    ctx.fillStyle = (weather === 'fog') ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.3)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                // AI Bounding Box (Frames 12+)
+                if (frame > 12) {
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([5, 5]); // dashed bounding box
+                    
+                    if (target === 'sign') {
+                        let yOffset = (frame * 10) % 200;
+                        ctx.strokeRect(canvas.width/2 + 40, 40 - yOffset, 220, 100);
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = '#10b981';
+                        ctx.fillRect(canvas.width/2 + 40, 20 - yOffset, 140, 20);
+                        ctx.fillStyle = '#000';
+                        ctx.font = 'bold 12px monospace';
+                        ctx.fillText('highway_sign 94%', canvas.width/2 + 45, 34 - yOffset);
+                    } else {
+                        let yOffset = (frame * 25) % canvas.height;
+                        let scale = (yOffset / canvas.height) * 2;
+                        ctx.strokeRect(canvas.width/2 - (30*scale), yOffset - 10, 60*scale, 120*scale);
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = '#10b981';
+                        ctx.fillRect(canvas.width/2 - (30*scale), yOffset - 30, 130, 20);
+                        ctx.fillStyle = '#000';
+                        ctx.font = 'bold 12px monospace';
+                        ctx.fillText(target + ' 89%', canvas.width/2 - (25*scale), yOffset - 16);
+                    }
+                }
+
+                // End Simulation
+                if (frame >= 25) {
+                    clearInterval(animate);
+                    generateJSON(vehicle, weather, target);
+                    
+                    setTimeout(() => {
+                        overlayText.innerHTML = "FPS: 15.0 | CAM: OV2640 | STATE: STANDBY<br>AWAITING NEXT HARDWARE INTERRUPT...";
+                        runBtn.disabled = false;
+                        runBtn.innerText = "INITIATE 80 KM/H SCAN";
+                        drawNoise();
+                    }, 800);
+                }
+            }, 40); // 40ms = 25fps simulation speed
+        }
+
+        function generateJSON(vehicle, weather, target) {
+            let rlVal = 0;
+            let status = "COMPLIANT";
+            
+            // Math logic based on selections
+            if (target === 'centre_line') rlVal = Math.floor(Math.random() * (160 - 130) + 130);
+            if (target === 'worn_line') { rlVal = Math.floor(Math.random() * (60 - 20) + 20); status = "REPAINT_REQUIRED"; }
+            if (target === 'sign') rlVal = Math.floor(Math.random() * (350 - 250) + 250);
+            
+            if (weather === 'rain') { rlVal = "ERR_REFRACTION_BROKEN"; status = "WEATHER_SUPPRESSED"; }
+            if (weather === 'fog' && target === 'worn_line') status = "NODE_MAINTENANCE_BLUR";
+
+            let kinematics = (vehicle === 'drone') 
+                ? { "z_axis_altitude": "3.4m", "LiDAR_correction": "Applied_Exp_Gain" } 
+                : { "z_axis_altitude": "1.5m_Fixed", "LiDAR_correction": "N/A" };
+
+            const payload = {
+                "timestamp": new Date().toISOString(),
+                "device_id": "DRISHTI-V1-EDGE-001",
+                "gps_telemetry": {
+                    "lat": 28.6139,
+                    "lon": 77.2090,
+                    "velocity_kmh": 82.4
+                },
+                "kinematics": kinematics,
+                "yolov8_sensor_fusion": {
+                    "target_classification": target.toUpperCase(),
+                    "differential_lux_net": Math.floor(Math.random() * 150 + 50),
+                    "RL_mcd_lx_m2": rlVal
+                },
+                "nhai_compliance_flag": status,
+                "atmospheric_condition": weather.toUpperCase()
+            };
+
+            // Typing effect for JSON
+            const textToType = "POST /api/v1/nhai/datalake/ingest HTTP/1.1\\nHost: datalake.nhai.gov.in\\nContent-Type: application/json\\n\\n" + JSON.stringify(payload, null, 2);
+            jsonOut.innerText = "";
+            let i = 0;
+            const typer = setInterval(() => {
+                jsonOut.innerText += textToType.charAt(i);
+                i++;
+                if (i >= textToType.length) clearInterval(typer);
+            }, 5);
+        }
+    </script>
+</body>
+</html>
